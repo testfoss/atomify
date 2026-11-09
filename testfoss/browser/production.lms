@@ -1,0 +1,81 @@
+let base_url = env("ATOMIFY_URL", "");
+let fixture = env("ATOMIFY_FIXTURE", "");
+if (base_url == "" || fixture == "") {
+  println("[FAIL] Set ATOMIFY_URL and ATOMIFY_FIXTURE; use testfoss/scripts/run-production-browser.sh.");
+  exit(1);
+}
+mkdir("testfoss/results");
+
+program = _lmcode_ cli="lmwebtest playwright";
+let b = pw.launch("chromium");
+let p = b.new_page();
+p.set_viewport(1440, 1000);
+p.set_default_timeout(120000);
+p.goto(pw.env("ATOMIFY_URL") + "/atomify/");
+p.get_by_test_id("shell-root").expect("toBeVisible", "[]");
+p.get_by_test_id("engine-loading-chip").expect("toHaveCount", "[0,{\"timeout\":120000}]");
+p.get_by_test_id("engine-error-chip").expect("toHaveCount", "[0]");
+
+p.get_by_test_id("sidebar-new-project").click();
+p.get_by_test_id("new-project-modal").expect("toBeVisible", "[]");
+p.get_by_test_id("project-name-input").fill("Testfoss LJ");
+p.get_by_test_id("create-project").click();
+p.get_by_test_id("project-title").expect("toHaveText", "[\"Testfoss LJ\"]");
+p.get_by_test_id("upload-input").set_input_files("\"" + pw.env("ATOMIFY_FIXTURE") + "\"");
+p.get_by_test_id("run-file-in.smoke-lj").expect("toBeVisible", "[]");
+p.get_by_test_id("run-file-in.smoke-lj").click();
+p.get_by_test_id("run-detail").expect("toBeVisible", "[]");
+p.get_by_test_id("status-pill-running").expect("toBeVisible", "[{\"timeout\":120000}]");
+p.get_by_test_id("run-console-toggle").click();
+p.get_by_test_id("run-console").expect("toContainText", "[\"Created 108 atoms\",{\"timeout\":120000}]");
+$return.viewport_ready = str_contains(p.get_by_test_id("run-viewport").inner_text(), "in.smoke-lj");
+
+p.get_by_test_id("status-pill-completed").expect("toBeVisible", "[{\"timeout\":300000}]");
+p.get_by_test_id("run-console").expect("toContainText", "[\"Loop time\",{\"timeout\":120000}]");
+$return.completed = true;
+$return.has_loop_time = str_contains(p.get_by_test_id("run-console").inner_text(), "Loop time");
+let completed_detail = p.get_by_test_id("run-detail").inner_text();
+$return.completed_100_steps = str_contains(completed_detail, "Total steps") && str_contains(completed_detail, "100");
+p.screenshot("testfoss/results/production-completed.png", true);
+
+p.get_by_test_id("run-detail-back").click();
+p.get_by_test_id("tab-files").click();
+p.get_by_test_id("run-file-in.smoke-lj").click();
+p.get_by_test_id("status-pill-running").expect("toBeVisible", "[{\"timeout\":120000}]");
+$return.replay_run_002 = str_contains(p.get_by_test_id("run-detail").inner_text(), "Run #002");
+p.get_by_test_id("stop-run").click();
+p.get_by_test_id("stop-run").expect("toHaveCount", "[0,{\"timeout\":120000}]");
+$return.replay_stopped = true;
+p.screenshot("testfoss/results/production-stopped.png", true);
+$return.page_errors = p.page_errors();
+b.close();
+end _lmcode_
+
+let res = run_lmcode(program, {command: ["lmwebtest", "playwright", "--lmcode", "$DSLFILE"]});
+let stats = {pass: 0, fail: 0};
+fn check(condition, name, detail) {
+  if (condition) {
+    stats["pass"] = stats.get("pass", 0) + 1;
+    println(f"[PASS] {name}: {detail}");
+  } else {
+    stats["fail"] = stats.get("fail", 0) + 1;
+    println(f"[FAIL] {name}: {detail}");
+  }
+}
+check(res.get("ok", false), "lmwebtest run", "production Playwright program completed");
+if (!res.get("ok", false)) {
+  println(json_stringify(res));
+  exit(1);
+}
+let r = res.get("result", {});
+check(r.get("viewport_ready", false), "run viewport", "simulation viewport is available");
+check(r.get("completed_100_steps", false), "100-step simulation", "completed metadata records 100 total steps");
+check(r.get("completed", false), "normal completion", "Completed status reached");
+check(r.get("has_loop_time", false), "LAMMPS output", "Loop time recorded");
+check(r.get("replay_run_002", false), "fixture playback", "second run is run-002");
+check(r.get("replay_stopped", false), "playback stop", "second run canceled");
+check(r.get("page_errors", "") == "[]", "browser errors", "no uncaught page errors");
+println(f"Atomify Testfoss: {str(stats.get('pass', 0))} passed, {str(stats.get('fail', 0))} failed");
+if (stats.get("fail", 0) > 0) {
+  exit(1);
+}

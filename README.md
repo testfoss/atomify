@@ -175,3 +175,7 @@ fresh start (notebook contents are stored in IndexedDB and are preserved).
 
 `npm run start`
 and open http://localhost:3000/atomify/ (remember the slash at the end)
+
+## Testfoss
+
+The `testfoss-demo` branch adds portable LJ fixtures, a production browser demo driven by `lmwebtest`, and build/test Actions without changing the upstream app or its registry `lammps.js@1.6.2` dependency. See [the Testfoss guide](testfoss/README.md) for reproduction and [the evidence record](durable-memory/status.md) for exact source pins, commands, and the distinction between registry-engine CI and separately verified fresh-engine lab results.
