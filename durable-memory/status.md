@@ -47,3 +47,7 @@ That lab-only build used a local `MAKE_JOBS=2` patch to `cpp/build.py`. The patc
 - Completed lab logs contained post-run `spcpu`/`cpuremain` query lines after normal Loop time and Completed status; browser console errors remained zero.
 - Upstream dependency audit findings, Vite chunk warnings, and WebGL readback performance warnings were not broadly patched.
 - No deployment, package publication, or secret access is configured.
+
+## Remote verification
+
+GitHub Actions run 42649080722 passed typecheck, unit tests, production builds, upstream production smoke, and the corrected lmwebtest completion/replay scenario using the registry engine.
