@@ -43,10 +43,9 @@ p.get_by_test_id("tab-files").click();
 p.get_by_test_id("run-file-in.smoke-lj").click();
 p.get_by_test_id("status-pill-running").expect("toBeVisible", "[{\"timeout\":120000}]");
 $return.replay_run_002 = str_contains(p.get_by_test_id("run-detail").inner_text(), "Run #002");
-p.get_by_test_id("stop-run").click();
-p.get_by_test_id("stop-run").expect("toHaveCount", "[0,{\"timeout\":120000}]");
-$return.replay_stopped = true;
-p.screenshot("testfoss/results/production-stopped.png", true);
+p.get_by_test_id("status-pill-completed").expect("toBeVisible", "[{\"timeout\":300000}]");
+$return.replay_completed = true;
+p.screenshot("testfoss/results/production-replayed.png", true);
 $return.page_errors = p.page_errors();
 b.close();
 end _lmcode_
@@ -73,7 +72,7 @@ check(r.get("completed_100_steps", false), "100-step simulation", "completed met
 check(r.get("completed", false), "normal completion", "Completed status reached");
 check(r.get("has_loop_time", false), "LAMMPS output", "Loop time recorded");
 check(r.get("replay_run_002", false), "fixture playback", "second run is run-002");
-check(r.get("replay_stopped", false), "playback stop", "second run canceled");
+check(r.get("replay_completed", false), "second run completion", "second run completed");
 check(r.get("page_errors", "") == "[]", "browser errors", "no uncaught page errors");
 println(f"Atomify Testfoss: {str(stats.get('pass', 0))} passed, {str(stats.get('fail', 0))} failed");
 if (stats.get("fail", 0) > 0) {

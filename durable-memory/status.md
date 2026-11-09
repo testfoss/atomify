@@ -20,7 +20,7 @@ testfoss/scripts/install-browser-tools.sh
 testfoss/scripts/run-production-browser.sh
 ```
 
-The second command executes `testfoss/browser/production.lms` with `lmscript`; its lmcode program invokes `lmwebtest playwright`. The production scenario uses the 100-step `testfoss/fixtures/in.smoke-lj` and checks the viewport, completion metadata, Loop time, a second run, and Stop. It passed all eight checks against the previously built genuine-engine demo. The separate 20,000-step fixture remains available for manual runs; a headless 20,000-step completion attempt exceeded five minutes and is not the CI gate. No notebook site is built, so the upstream notebook smoke case is expected to skip.
+The second command executes `testfoss/browser/production.lms` with `lmscript`; its lmcode program invokes `lmwebtest playwright`. The production scenario uses the 100-step `testfoss/fixtures/in.smoke-lj` and checks the viewport, completion metadata, Loop time, and a second completed run. The separate 20,000-step fixture remains available for manual runs; a headless 20,000-step completion attempt exceeded five minutes and is not the CI gate. No notebook site is built, so the upstream notebook smoke case is expected to skip.
 
 ## Separate genuine-engine local evidence
 
@@ -43,7 +43,7 @@ That lab-only build used a local `MAKE_JOBS=2` patch to `cpp/build.py`. The patc
 ## Known limitations
 
 - `testfoss/browser/read-engine.js` requires the development server's source module and is excluded from production checks.
-- The lab observed that Space-key pause did not invoke `setPaused`; its direct app pause/resume action worked. The production lmwebtest scenario therefore verifies replay and Stop rather than claiming keyboard-pause coverage.
+- The lab observed that Space-key pause did not invoke `setPaused`; its direct app pause/resume action worked. The new production scenario verifies completion and replay, not keyboard pause or cancellation. A separate long-run Stop diagnostic left the stop control present after two minutes, and a short second run could complete before Stop; neither behavior is presented as a cancellation pass.
 - Completed lab logs contained post-run `spcpu`/`cpuremain` query lines after normal Loop time and Completed status; browser console errors remained zero.
 - Upstream dependency audit findings, Vite chunk warnings, and WebGL readback performance warnings were not broadly patched.
 - No deployment, package publication, or secret access is configured.

@@ -49,5 +49,5 @@ jobs:
       - run: npm run e2e:smoke
       - name: Install pinned lmwebtest host
         run: testfoss/scripts/install-browser-tools.sh
-      - name: Run production progress and playback through lmwebtest
+      - name: Run production completion and replay through lmwebtest
         run: testfoss/scripts/run-production-browser.sh

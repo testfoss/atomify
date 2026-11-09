@@ -19,7 +19,7 @@ testfoss/scripts/install-browser-tools.sh
 testfoss/scripts/run-production-browser.sh
 ```
 
-The last command starts the production preview on port 5201, runs `testfoss/browser/production.lms` through `lmscript` and `lmwebtest playwright`, and stops the server. It checks engine readiness, 108-atom setup, 100-step completion metadata, normal completion and `Loop time`, a second run, and Stop. The additive scenario passed all eight checks against the previously built genuine-engine demo. The screenshot and server log go to the ignored `testfoss/results/` directory. Set `ATOMIFY_PORT` or `ATOMIFY_URL` to override the preview location.
+The last command starts the production preview on port 5201, runs `testfoss/browser/production.lms` through `lmscript` and `lmwebtest playwright`, and stops the server. It checks engine readiness, 108-atom setup, 100-step completion metadata, normal completion and `Loop time`, and a second completed run. Cancellation is not asserted: a long-run Stop diagnostic left the stop control present after two minutes. The screenshot and server log go to the ignored `testfoss/results/` directory. Set `ATOMIFY_PORT` or `ATOMIFY_URL` to override the preview location.
 
 The tool bootstrap pins `@lmctl-ai/lmctl@0.2.454` and `lmctl-ai/lmwebtest@2920befd355eacc654697820d690db074e94dce3`. Tool checkouts, npm dependencies, and browsers are disposable and are never demo artifacts to commit.
 
